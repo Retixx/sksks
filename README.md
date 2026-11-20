@@ -1,3 +1,3 @@
 # Contribution graph demo
 
-Synthetic commits for the 2026 contribution graph.
+Synthetic commit history for June 13 through November 19, 2026.
