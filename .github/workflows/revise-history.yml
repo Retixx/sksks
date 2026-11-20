@@ -1,9 +1,8 @@
-name: Build revised 2026 demo history
+name: Build updated 2026 demo history
 on:
   push:
     branches: [main]
     paths: [.github/workflows/revise-history.yml]
-  workflow_dispatch:
 permissions:
   contents: write
 concurrency: revise-demo-history
@@ -13,9 +12,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - name: Publish revised demo branch
+      - name: Publish updated demo branch
         run: |
-          git switch --orphan revised-2026
+          git switch --orphan revised-2026-v2
           git config user.name 'Maxim Mohareb'
           git config user.email '140958895+Retixx@users.noreply.github.com'
           python3 - <<'PY'
@@ -25,10 +24,10 @@ jobs:
           from pathlib import Path
 
           start = date(2026, 6, 13)
-          encoded = '000001020b020001020f0e0108060b020201120z02000101020w0500000701060g020d030006000103090100000000000v000202000000000000000001000900010000040b000300000000000a0f03010e0004010g010502020204031101120204070e020001060g0e060e0001020600000004060800090102010e07020a02000102050101110b020g0g0a0802010f0000000802030d030501000g02000c0202'
+          encoded = '000001000b020001020f0e0008060i020201120z02000101020w05000007010j0g020d000006000003090100000000000v000200000000000000000001000n00010000000b000l00000000000a0f03000e000g010g01050002020s001101120004070r000001060n0e060q000102060000000p0i08000k0002010o0h020a020001020m0001110j000g0g0k0g02010m0000000800030d0f0501000g00000c0202'
           counts = [int(encoded[i:i + 2], 36) for i in range(0, len(encoded), 2)]
-          assert len(counts) == 160 and sum(counts) == 844
-          Path('README.md').write_text('# Contribution graph demo\n\nSynthetic commits for the 2026 contribution graph.\n')
+          assert len(counts) == 160 and sum(counts) == 1059
+          Path('README.md').write_text('# Contribution graph demo\n\nSynthetic commit history for June 13 through November 19, 2026.\n')
           subprocess.run(['git', 'add', 'README.md'], check=True)
           for offset, count in enumerate(counts):
               day = start + timedelta(days=offset)
@@ -38,5 +37,5 @@ jobs:
                   env = dict(os.environ, GIT_AUTHOR_DATE=timestamp, GIT_COMMITTER_DATE=timestamp)
                   subprocess.run(['git', 'commit', '--quiet', '--allow-empty', '-m', f'Generated activity for {day}'], env=env, check=True)
           PY
-          test "$(git rev-list --count HEAD)" = 844
-          git push origin HEAD:refs/heads/revised-2026
+          test "$(git rev-list --count HEAD)" = 1059
+          git push origin HEAD:refs/heads/revised-2026-v2
