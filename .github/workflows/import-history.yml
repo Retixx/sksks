@@ -1,0 +1,36 @@
+name: Import generated contribution history
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/import-history.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: import-generated-history
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Verify and import the bundle
+        shell: bash
+        run: |
+          bundle=retixx-activity-history.bundle
+          if [[ ! -f "$bundle" ]]; then
+            git merge-base --is-ancestor 0128fe62de9e55e14df5910b0869f94ed464def8 HEAD
+            exit 0
+          fi
+          git bundle verify "$bundle"
+          git fetch "./$bundle" refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = 0128fe62de9e55e14df5910b0869f94ed464def8
+          test "$(git rev-list --count FETCH_HEAD)" -eq 761
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-commit --no-ff --allow-unrelated-histories -s ours FETCH_HEAD
+          git rm "$bundle"
+          git commit -m 'Import 761 generated commits across 365 days'
+          git push origin HEAD:refs/heads/main
